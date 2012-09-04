@@ -1,0 +1,36 @@
+{
+    "name": "hometab",
+    "version": "0.0.1",
+    "description": "HomeTab",
+    "load": "lib/app",
+    "modules": ["lib"],
+    "attachments": "static",
+    "dust": {
+        "templates": "templates"
+    },
+    "less": {
+        "compress": true,
+        "compile": ["static/css/site.less"],
+        "remove_from_attachments": true
+    },
+    "duality": {
+        "base_template": "base.html"
+    },
+    "coffee-script": {
+        "modules": ["lib"]  
+    },
+    "dependencies": {
+        "modules": null,
+        "settings": null,
+        "attachments": null,
+        "properties": null,
+        "coffee-script-precompiler": null,
+        "dust": null,
+        "duality": null,
+        "duality-dust": null,
+        "less-precompiler": null,
+        "bootstrap": null,
+        "spine-adapter": null,
+        "querystring": null
+    }
+}
