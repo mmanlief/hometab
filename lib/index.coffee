@@ -74,8 +74,8 @@ class PagesApp extends Spine.Controller
 		super
 		Page.bind("create", @addOne)
 		Page.bind("refresh", @render)
-		$.event.props.push('dataTransfer')
-		$(window).on('drop', @dropped)
+		jQuery.event.props.push('dataTransfer')
+		jQuery(window).on('drop', @dropped)
 		Page.fetch()
 		window.onbeforeunload = ->
 			if Spine.CouchAjax.pending
@@ -83,6 +83,7 @@ class PagesApp extends Spine.Controller
 				you may lose unsaved changes if you close the page.'''
 		@centerModal(@addPageModal)
 		@handleQueryString()
+		jQuery(window).resize(jQuery.throttle(100, @setGridPositioning))
 
 
 	addOne: (page) =>
@@ -99,6 +100,7 @@ class PagesApp extends Spine.Controller
 		pages = Page.all().sort(Page.visitedSort)
 		@items.empty();
 		pages.forEach(@addOne)
+		@setGridPositioning()
 
 	dropped: (e) =>
 		e.preventDefault()
@@ -123,5 +125,15 @@ class PagesApp extends Spine.Controller
 			qs = querystring.parse(url.split('?')[1])
 			if(qs.u?)
 				@create(querystring.unescape(qs.u))
+
+	setGridPositioning: ->
+		gridItems = jQuery("#pages-outer div[class*='grid-item']")
+		windowWidth = jQuery(window).width() - 10
+		itemWidth = gridItems.first().width() + 8
+		itemsPerRow = Math.floor(windowWidth / itemWidth)
+		itemCount = Math.min(itemsPerRow, gridItems.length - 2)
+		itemsWidth = itemWidth * itemCount
+		extraSpace = windowWidth - itemsWidth
+		jQuery("#pages-outer").css('padding-left', (extraSpace / 2) - 7)
 
 module.exports = PagesApp
