@@ -8,46 +8,11 @@
     <link rel="stylesheet" href="static/css/smoothness/jquery-ui-1.8.23.custom.css" />
 	</head>
 	<body>
-		<div class="pagination-centered">
-		    <div style="position: relative;">
-		        <div style="position: absolute; top: 10px; left: 4px;">
-		            <i class="icon-th" style="margin-top: -1px;"></i><strong style="font-size: 18px;">HomeTab</strong><em style="font-family: 'Courier New'; font-size: 12px; color: blue;">BETA</em>
-		        </div>
-		        <div style="position: absolute; top: 4px; right: 54px;">
-		            <a class="btn" style="" title="Unlock Drag'n'Drop"><i class="icon-lock" id="dndLock"></i></a>
-		        </div>
-		        <div style="position:absolute; top: 4px; right: 4px;">
-		            <a class="btn" style="" data-toggle="modal" data-target="#optionsModal" title="Options"><i class="icon-cog"></i></a>
-		        </div>
-		        <form id="searchForm">
-		            <input type="text" name="q" size="31" maxlength="255" value="" placeholder="Search..."/>
-		        </form>
-		    </div>
-		</div>
-		<div id="views">
-			<div id="pages">
-				<div class="modal hide fade" id="add-page-modal">
-					<form id="addPageForm">
-						<div class="pagination-centered">
-							<input type="text" name="url" placeholder="Enter URL..."/>
-							<p style="padding-right: 4px; padding-left: 4px;">Or drag this link to your toolbar or bookmark this link to add sites on the fly: <a href="javascript: window.location.href = 'http://5.42.162.89:8090/?u=' + escape(window.location.href);">Add to HomeTab</a></p>
-						</div>
-					</form>
-				</div>
-				<div id="pages-outer" style="position: relative;">
-					<div class="show-grid" id="pages-grid"></div>
-				    <div class="show-grid not-sortable">
-				        <div class="grid-item add-page-item" id="addPageItem">
-				            <a class="btn add-page-btn" data-toggle="modal" data-target="#add-page-modal">Drag and drop link to this window or click here to add a page!</a>
-				        </div>
-				        <div class="grid-item add-page-item" id="trashItem" style="visibility: hidden;">
-				            <btn class="btn add-page-btn" data-toggle="modal" data-target="#add-page-modal">
-				            <i class="icon-trash"></i><br />Drop here to delete!</btn>
-				        </div>
-				    </div>
-				</div>
-			</div>
-		</div>
+		{?user}
+			{>"add_page_partial.html"/}
+			{>"topbar_partial.html"/}
+		{/user}
+		{content|s}
 		<script src="static/js/json2.js"></script>
 		<script src="static/js/jquery-1.8.1.js"></script>
 	    <script src="static/js/bootstrap-tooltip.js"></script>
@@ -62,12 +27,15 @@
 	    <script src="static/js/jquery.ba-throttle-debounce.js"></script>
 	    <script src="static/js/jquery.ui.touch-punch.js"></script>
 		<script src="modules.js"></script>
-		<script type="text/javascript" charset="utf-8">
-			var exports = this;
-			jQuery(function() {
-				var App = require("lib/index");
-				exports.app = new App({el: $("#pages")});
-			});
-		</script>
+		<script src="duality.js"></script>
+		{?user}
+			<script type="text/javascript" charset="utf-8">
+				var exports = this;
+				jQuery(function() {
+					var App = require("lib/index");
+					exports.app = new App({el: $("#pages")});
+				});
+			</script>
+		{/user}
 	</body>
 </html>

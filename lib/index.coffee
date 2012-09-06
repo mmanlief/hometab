@@ -68,7 +68,6 @@ class Pages extends Spine.Controller
 class PagesApp extends Spine.Controller
 	elements:
 		"#pages-grid"	: "items"
-		"#add-page-modal": "addPageModal"
 
 	constructor: ->
 		super
@@ -81,7 +80,7 @@ class PagesApp extends Spine.Controller
 			if Spine.CouchAjax.pending
 				'''Data is still being sent to the server; 
 				you may lose unsaved changes if you close the page.'''
-		@centerModal(@addPageModal)
+		@centerModal(jQuery("#add-page-modal"))
 		@handleQueryString()
 		jQuery(window).resize(jQuery.throttle(100, @setGridPositioning))
 

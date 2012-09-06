@@ -1,3 +1,4 @@
 module.exports =
 	shows: require("./shows")
-	rewrites: require("./rewrites")
+	rewrites: require("./rewrites"),
+	updates: require("./updates")
