@@ -1,0 +1,60 @@
+<div id="content">
+<div class="hero-unit">
+    <div class="pagination-centered">
+        <h2>HomeTab</h2>
+        <p>A simple cross-device homepage</p>
+    </div>
+    <table id="account_centering_table">
+    	<tr>
+    		<td class="centering-table-left"></td>
+    		<td>
+			    <table class="well" style="width: 0%;">
+			        <tr>
+			        	<td class="account-log-on">
+			        		<h2 class="pagination-centered">Log On</h2>
+			        		<div id="logon_form">
+								<div class="form-label">
+									<label for="id_logonusername">Username</label>
+								</div>
+								<div class="form-content">
+									<div class="inner">
+										<input type="text" value="" name="logonusername" id="id_logonusername" />
+									</div>
+								</div>
+								<div class="form-label">
+									<label for="id_logonpassword">Password</label>
+								</div>
+								<div class="form-content">
+									<div class="inner">
+										<input type="password" value="" name="logonpassword" id="id_logonpassword" />
+									</div>
+								</div>
+								<div id="logon_error"></div>
+								<div class="actions">
+									<input class="btn" type="reset" value="Clear" />
+									<button class="btn primary">Log On</button>
+								</div>
+							</div>
+			        	</td>
+			        	<td class="account-or">
+			        		<h2>or</h2>
+			        	</td>
+			        	<td class="account-register">
+			        		<h2 class="pagination-centered">Register</h2>
+							<form id="account_form" action="" method="POST">
+								<input type="hidden" name="next" value="{next}" />
+								{registerForm|s}
+								<div class="actions">
+									<input class="btn" type="reset" value="Clear" />
+									<input class="btn primary" type="submit" value="Sign up" />
+								</div>
+							</form>
+						</td>
+					</tr>
+			    </table>
+			</td>
+			<td class="centering-table-right"></td>
+		</tr>
+	</table>
+</div>
+</div>

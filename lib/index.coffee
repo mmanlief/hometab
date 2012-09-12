@@ -10,10 +10,12 @@ require("spine/relation")
 
 templates = require("duality/templates")
 
-sortable = require ("./sortable")
+sortable = require("./sortable")
+
+search = require("./search")
 
 class User extends Spine.Model
-	@configure "User", "id", "_id", "user_name", "pages", "options"
+	@configure "User", "id", "_id", "user_name", "pages", "options", "search_history"
 
 	@extend Spine.Model.CouchAjax
 
@@ -24,9 +26,8 @@ class User extends Spine.Model
 		if(l.user_order > r.user_order) then 1 else -1
 
 	@defaultOptions: ->
-		{
 			sort_order: "user"
-		}
+			remember_search: true
 
 	@findPageByUrl: (pages, url) ->
 		found = null
@@ -96,6 +97,7 @@ class Pages extends Spine.Controller
 class PagesApp extends Spine.Controller
 	user: null
 	sortable: null
+	search: null
 
 	elements:
 		"#pages_grid"			: "items"
@@ -107,8 +109,6 @@ class PagesApp extends Spine.Controller
 
 	constructor: ->
 		super
-		#User.bind("refresh", @render)
-		#User.bind("save", @render)
 		UserEvents.bind("remove", @removeOne)
 		UserEvents.bind("visit", @render)
 		UserEvents.bind("add", @addOne)
@@ -137,10 +137,23 @@ class PagesApp extends Spine.Controller
 								@user = User.fromJSON(res)
 								User.refresh(res)
 							else
-								User.refresh(@user = User.create(id: id, _id: id, user_name: id, pages: [], options: User.defaultOptions))
+								User.refresh(@user = User.create(
+									id: id
+									_id: id
+									user_name: id
+									pages: []
+									options: User.defaultOptions
+									search_history: []
+								))
 							@render()
-							@sortable = new sortable.SortableController({el: @el, user: @user})
+							@sortable = new sortable.SortableController
+								el: @el
+								user: @user
 							@sortable.setupSortable()
+							@search = new search.SearchController
+								el: @el
+								user: @user
+							@search.setupSearch()
 
 	addOne: (page) =>
 		view = new Pages(item: page, user: @user)
@@ -168,11 +181,6 @@ class PagesApp extends Spine.Controller
 
 	render: =>
 		pages = @sort(@user.pages)
-		###els = _.map pages, (page) =>
-			new Pages(item: page, user: @user).render().el
-		@items.empty();
-		els.forEach (el) =>
-			@items.append(jQuery(el))###
 		@items.empty();
 		pages.forEach(@addOne)
 		@setGridPositioning()

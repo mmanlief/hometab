@@ -220,7 +220,7 @@ var sanitizeArguments = function(username, password, properties, cb, cb2) {
  * ```
  */
 
-exports.delete = function (username, callback) {
+exports.deleteDoc = function (username, callback) {
     exports.get(username, function(err, user, options) {
         if (err) { return callback(err); }
 
