@@ -7,12 +7,22 @@ module.exports = [
 	from: "/"
 	to: "_show/root"
 ,
-	from: "/create_account"
-	to: "_update/create_account"
+	from: "/root"
+	to: "_show/root"
+,
+	from: "/account"
+	to: "_update/account"
 	method: "POST"
 ,
-	from: "/create_account"
-	to: "_show/create_account"
+	from: "/logon"
+	to: "_update/logon"
+	method: "POST"
+,
+	from: "/account"
+	to: "_show/account"
+,
+	from: "/test"
+	to: "_show/test"
 ,
 	from: "*"
 	to: "_show/not_found"

@@ -1,20 +1,42 @@
-$ = window.jQuery
 Spine = require("spine/core")
 utils = require("duality/utils")
 {_} = require("underscore")
 querystring = require("querystring")
+session = require('session')
 
+db = require("db")
 require("spine-adapter/couch-ajax")
+require("spine/relation")
 
 templates = require("duality/templates")
 
-class Page extends Spine.Model
-	@configure "Page", "page_url", "visited_count", "page_title"
+sortable = require ("./sortable")
+
+class User extends Spine.Model
+	@configure "User", "id", "_id", "user_name", "pages", "options"
 
 	@extend Spine.Model.CouchAjax
 
 	@visitedSort: (l, r) ->
 		if(l.visited_count < r.visited_count) then 1 else -1
+
+	@userOrderSort: (l, r) ->
+		if(l.user_order > r.user_order) then 1 else -1
+
+	@defaultOptions: ->
+		{
+			sort_order: "user"
+		}
+
+	@findPageByUrl: (pages, url) ->
+		found = null
+		pages.forEach (page) ->
+			if(page.page_url == url)
+				found = page
+		return found
+
+class UserEvents extends Spine.Module
+	@extend Spine.Events
 
 class Pages extends Spine.Controller
 	events:
@@ -28,78 +50,138 @@ class Pages extends Spine.Controller
 
 	constructor: ->
 		super
-		@item.bind("update", @render)
-		@item.bind("destroy", @release)
-		if(!(@item.page_title?))
+		if(!@item.page_title)
 			@updateTitle()
 
 	template: (item) ->
 		templates.render("template_page.html", {}, item)
 
 	render: =>
-		@replace($(@template(Page.find(@item.id))))
+		@replace($(@template(@item)))
 		@titles.tooltip()
 		@infos.tooltip()
 		@
 
-	remove: ->
-		@item.destroy()
-
 	visit: (e) ->
 		e.preventDefault()
-		if(!(@item.visited_count?))
+		if(!@item.visited_count)
 			@item.visited_count = 0
 		@item.visited_count = @item.visited_count + 1
-		@item.save()
-		#@item.trigger('refresh');
-		@delay ->
+		@user.save()
+		UserEvents.trigger("visit")
+		@redirectAfterSave()
+		return false;
+
+	redirectAfterSave: ->
+		if(Spine.CouchAjax.pending)
+			@delay(->
+				@redirectAfterSave(@item)
+			, 50)
+		else
 			window.location.href = @item.page_url
-		, 250
+
 
 	updateTitle: ->
 		$.ajax({
-			url: "http://5.42.162.89:8090/magick/title?url=" + querystring.escape(@item.page_url),
+			url: "/magick/title?url=" + querystring.escape(@item.page_url),
 			success: (data) =>
 				@item.page_title = data
-				@item.save()
+				@user.save()
 		})
+
+	remove: =>
+		UserEvents.trigger("remove", @item)
 
 
 class PagesApp extends Spine.Controller
+	user: null
+	sortable: null
+
 	elements:
-		"#pages-grid"	: "items"
+		"#pages_grid"			: "items"
+		"#add_page_modal"		: "addPageModal"
+		"#user_options_modal"	: "userOptionsModal"
+		"#dnd_lock"				: "dndLock"
+		"#trash_item"			: "trashItem"
+		"#add_page_item"		: "addPageItem"
 
 	constructor: ->
 		super
-		Page.bind("create", @addOne)
-		Page.bind("refresh", @render)
+		#User.bind("refresh", @render)
+		#User.bind("save", @render)
+		UserEvents.bind("remove", @removeOne)
+		UserEvents.bind("visit", @render)
+		UserEvents.bind("add", @addOne)
 		jQuery.event.props.push('dataTransfer')
 		jQuery(window).on('drop', @dropped)
-		Page.fetch()
+		@fetchUser()
 		window.onbeforeunload = ->
 			if Spine.CouchAjax.pending
 				'''Data is still being sent to the server; 
 				you may lose unsaved changes if you close the page.'''
-		@centerModal(jQuery("#add-page-modal"))
+		@centerModal(@userOptionsModal)
+		@centerModal(@addPageModal)
 		@handleQueryString()
 		jQuery(window).resize(jQuery.throttle(100, @setGridPositioning))
 
+	fetchUser: =>
+		if(@user == null)
+			session.info (err, info) =>
+				if(!err)
+					userCtx = info.userCtx
+					if(userCtx.name && userCtx.name != "")
+						id = userCtx.name
+						appdb = db.use(require('duality/core').getDBURL())
+						appdb.getDoc id, (err, res) =>
+							if(res)
+								@user = User.fromJSON(res)
+								User.refresh(res)
+							else
+								User.refresh(@user = User.create(id: id, _id: id, user_name: id, pages: [], options: User.defaultOptions))
+							@render()
+							@sortable = new sortable.SortableController({el: @el, user: @user})
+							@sortable.setupSortable()
 
 	addOne: (page) =>
-		view = new Pages(item: page)
+		view = new Pages(item: page, user: @user)
 		@items.append(view.render().el)
 
-	addAll: =>
-		Page.each(@addOne)
+	removeOne: (page) =>
+		@user.pages.splice(@user.pages.indexOf(page), 1)
+		@user.save()
+		@items.find("a[data-page-url='" + page.page_url + "']").parent().parent().remove()
 
-	create: (url) ->
-		Page.create(page_url: url, visited_count: 0)
+	addAll: =>
+		user.pages.forEach(@addOne)
+
+	create: (url) =>
+		userOrder = 0
+		if(User.findPageByUrl(@user.pages, url))
+			alert(url + " already added.")
+		else
+			if(@user.pages.length > 0)
+				userOrder = jQuery(@user.pages.sort(User.userOrderSort)).last()[0].user_order + 1
+			page = page_url: url, visited_count: 0, user_order: userOrder
+			@user.pages.push(page)
+			@user.save()
+			UserEvents.trigger("add", page)
 
 	render: =>
-		pages = Page.all().sort(Page.visitedSort)
+		pages = @sort(@user.pages)
+		###els = _.map pages, (page) =>
+			new Pages(item: page, user: @user).render().el
+		@items.empty();
+		els.forEach (el) =>
+			@items.append(jQuery(el))###
 		@items.empty();
 		pages.forEach(@addOne)
 		@setGridPositioning()
+
+	sort: (pages) =>
+		if(@user.options.sort_order == "visited")
+			return pages.sort(User.visitedSort)
+		else
+			return pages.sort(User.userOrderSort)
 
 	dropped: (e) =>
 		e.preventDefault()
@@ -122,17 +204,18 @@ class PagesApp extends Spine.Controller
 		url = window.location.href
 		if(-1 != url.indexOf('?u='))
 			qs = querystring.parse(url.split('?')[1])
-			if(qs.u?)
+			if(qs.u)
 				@create(querystring.unescape(qs.u))
 
 	setGridPositioning: ->
-		gridItems = jQuery("#pages-outer div[class*='grid-item']")
+		gridItems = jQuery("#pages_outer div[class*='grid-item']")
 		windowWidth = jQuery(window).width() - 10
 		itemWidth = gridItems.first().width() + 8
 		itemsPerRow = Math.floor(windowWidth / itemWidth)
-		itemCount = Math.min(itemsPerRow, gridItems.length - 2)
+		itemCount = Math.min(itemsPerRow, gridItems.length - 1)
 		itemsWidth = itemWidth * itemCount
 		extraSpace = windowWidth - itemsWidth
-		jQuery("#pages-outer").css('padding-left', (extraSpace / 2) - 7)
+		jQuery("#pages_outer").css('padding-left', (extraSpace / 2) - 7)
 
-module.exports = PagesApp
+module.exports.App = PagesApp
+module.exports.User = User

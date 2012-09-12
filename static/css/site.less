@@ -1,148 +1,16 @@
 @import "bootstrap/less/bootstrap.less";
-//body { background-color: @gray; }
+@import "topbar.less";
+@import "pages.less";
+@import "account.less";
+body { background-color: #f5f5f5; }
 
 @iconSpritePath: "../img/glyphicons-halflings.png";
 @iconWhiteSpritePath: "../img/glyphicons-halflings-white.png";
 
-.show-grid 
-{
-  margin-top: 0px;
-  margin-bottom: 20px;
-  /*margin-left: 10px;*/
-}
-.show-grid [class*="span"]
-{
-  background-color: #eee;
-  text-align: center;
-  -webkit-border-radius: 3px;
-     -moz-border-radius: 3px;
-          border-radius: 3px;
-  min-height: 40px;
-  line-height: 40px;
-  margin-top: 10px;
-  margin-right: 5px;
-  margin-left: 5px;
-}
-.show-grid .show-grid
-{
-  margin-top: 0;
-  margin-bottom: 0;
-}
-.show-grid .show-grid [class*="span"] 
-{
-  background-color: #ccc;
-}
-.page-item-tooltip
-{
-    display: inline-block;
-}
-.page-item-image
-{
-    width: 216px;
-    height: 126px;
-}
-.grid-item {
-  width: 216px;
-  height: 126px;
-  float: left;
-  margin-left: 10px;
-  margin-top: 20px;
-}
-.grid-item img{
-  width: 216px;
-  height: 126px;
-}
-.remove-parent
-{
-    position: relative;
-}
-.remove-container
-{
-    position: absolute;
-    right: 8px;
-    top: -2px;
-    opacity: 0.3;
-    filter: "alpha(opacity=0.3)";
-}
-.remove-btn
-{
-    padding: 2px 4px;
-}
-.info-container
-{
-    position: absolute;
-    right: 40px;
-    top: -2px;
-    opacity: 0.3;
-    filter: "alpha(opacity=0.3)";
-}
-.info-btn
-{
-    padding: 2px 4px;
-}
-.add-page-item
-{
-    height: 126px;
-    display: table;
-}
 
-.add-page-btn
-{
-    height: 100%;
-    display: table-cell;
-    vertical-align: middle;
-}
-
-#add-page-modal input[type='text']
+#add_page_modal input[type='text']
 {
     width: 94%;
     margin-top: 8px;
     margin-left: 8px;
-}
-
-#create_account_form label {
-    margin-right: 1em;
-    width: 100px;
-    text-align: left;
-}
-#create_account_form .hint {
-    font-size: 11px;
-    color: #666;
-    float: right;
-    margin-top: -1.4em;
-    width: 475px;
-}
-#create_account_form .error .hint {
-    display: none;
-}
-
-#create_account_form .errors ul,
-#create_account_form .errors ul li {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    color: red;
-}
-#create_account_form .errors {
-    float: right;
-    width: 475px;
-    margin-top: -2.9em;
-    color: red;
-    font-size: 11px;
-}
-
-#create_account_form .field {
-    margin-bottom: 0.75em;
-}
-
-#create_account_form .actions {
-    margin-top: 2em;
-}
-
-#create_account_form .username-available {
-    color: green;
-}
-#create_account_form .username-taken,
-#create_account_form .error {
-    color: red;
 }

@@ -11,7 +11,8 @@
     "less": {
         "compress": true,
         "compile": ["static/css/site.less"],
-        "remove_from_attachments": true
+        "remove_from_attachments": true,
+        "paths": ["static/css"]
     },
     "duality": {
         "base_template": "base.html"

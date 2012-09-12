@@ -32,14 +32,17 @@ exports.setMaxListeners(1000);
 
 exports.scriptTagForEvent = function (name) {
     var rv = (
-        '<script type="text/javascript">' +
-        "// <![CDATA[\n" +
-            "if (typeof require !== 'undefined') {\n" +
-            "  require('couchtypes/render').emit('" +
-                sanitize.cdata(sanitize.js(name)) +
-            "');\n" +
-            "}" +
-        "// ]]>" +
+        '<script type="text/javascript">\n' +
+            "var emit = function() {\n" +
+                "if (typeof require !== 'undefined') {\n" +
+                "  require('couchtypes/render').emit('" +
+                    sanitize.cdata(sanitize.js(name)) +
+                    "');\n" +
+                "} else {\n" +
+                "   setTimeout(emit, 5);\n" +
+                "}\n" +
+            "};\n" +
+            "emit();\n" +
         '</script>'
     );
 
