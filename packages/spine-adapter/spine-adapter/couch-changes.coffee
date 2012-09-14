@@ -1,7 +1,7 @@
 db       = require "db"
 duality  = require "duality/core"
 session  = require "session"
-
+Spine   = require 'spine/core'
 
 feeds = {} # Cache `_changes` feeds by their url
 

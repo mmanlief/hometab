@@ -6,13 +6,12 @@ session = require('session')
 
 db = require("db")
 require("spine-adapter/couch-ajax")
-require("spine/relation")
 
 templates = require("duality/templates")
 
 sortable = require("./sortable")
-
 search = require("./search")
+options = require("./options")
 
 class User extends Spine.Model
 	@configure "User", "id", "_id", "user_name", "pages", "options", "search_history"
@@ -98,6 +97,7 @@ class PagesApp extends Spine.Controller
 	user: null
 	sortable: null
 	search: null
+	options: null
 
 	elements:
 		"#pages_grid"			: "items"
@@ -112,6 +112,7 @@ class PagesApp extends Spine.Controller
 		UserEvents.bind("remove", @removeOne)
 		UserEvents.bind("visit", @render)
 		UserEvents.bind("add", @addOne)
+		UserEvents.bind("optionsChanged", @render)
 		jQuery.event.props.push('dataTransfer')
 		jQuery(window).on('drop', @dropped)
 		@fetchUser()
@@ -154,6 +155,17 @@ class PagesApp extends Spine.Controller
 								el: @el
 								user: @user
 							@search.setupSearch()
+							@options = new options.OptionsController
+								el: @el
+								user: @user
+							appdb.changes
+								include_docs: yes
+								filter: "hometab/usermodel"
+							, @handleChanges
+
+	handleChanges: (err, resp) =>
+		@user = User.fromJSON(resp.results[0].doc)
+		@render()
 
 	addOne: (page) =>
 		view = new Pages(item: page, user: @user)
@@ -227,3 +239,4 @@ class PagesApp extends Spine.Controller
 
 module.exports.App = PagesApp
 module.exports.User = User
+module.exports.UserEvents = UserEvents

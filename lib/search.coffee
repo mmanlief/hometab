@@ -10,16 +10,22 @@ class SearchController extends Spine.Controller
 		"#search_form"						: "searchForm"
 		"#search_form input[type='text']"	: "searchInput"
 
+	events:
+		"submit #search_form"				: "doSearch"
+
 	constructor: ->
 		super
+		App.UserEvents.bind("optionsChanged", @setupSearch)
 
 	setupSearch: =>
-		@searchInput.autocomplete
-			source: @taSource()
-			minLength: 0
-		@searchInput.click =>
-			@searchInput.autocomplete("search")
-		@searchForm.submit @doSearch
+		if(@user.options.remember_search)
+			@searchInput.autocomplete
+				source: @taSource()
+				minLength: 0
+			@searchInput.click =>
+				@searchInput.autocomplete("search")
+		else
+			@user.search_history = []
 
 	doSearch: (e) =>
 		e.preventDefault()

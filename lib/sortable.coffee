@@ -12,6 +12,7 @@ class SortableController extends Spine.Controller
 	
 	constructor: ->	
 		super
+		App.UserEvents.bind("optionsChanged", @setupSortable)
 
 	setupSortable: =>
 		pageItems = @items.find("div[class*='page-item']")
